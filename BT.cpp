@@ -24,21 +24,36 @@ struct node
   }
 };
 
-
-void addElement (node*& N, int value) 
+bool isInTree(node *N, int value)
 {
+     while (N != NULL)
+     {
+           if (N->value == value)
+              return true;
+           N = (N->value < value) ? N->right : N->left;
+     }
+     return false;
+}       
+
+bool addNode (node*& N, int value) 
+{
+  static bool added = false; //returns don't work well with recurrence...
   if (N == NULL) 
   {
     node* newNode = new node(value);
     N = newNode;
-  } 
-  else 
+    added = true;
+  }
+  else if (isInTree(N, value) == false)
   {
     if (value >= N->value)
-      addElement(N->right, value);
+      addNode(N->right, value);
     else
-      addElement(N->left, value);
+      addNode(N->left, value);
   }
+  else
+      added = false;
+  return added;
 }
 
 void getHeightOfTree (node* N, int &heightMax, int actualHeight) 
@@ -52,7 +67,7 @@ void getHeightOfTree (node* N, int &heightMax, int actualHeight)
 }
 
 void draw (node* N, int height, int actualHeight) 
-{
+{    
   if (N != NULL) 
   {
     draw (N->right, height, actualHeight+1);
@@ -76,6 +91,8 @@ void drawTree (node* root)
     getHeightOfTree(root, height, 1);
     draw(root, height, 1);
   }
+  else
+    cout<<"Tree is empty!"<<endl; 
 }
 
 node* findMin (node* N)
@@ -84,7 +101,7 @@ node* findMin (node* N)
             N = N->left;
       return N;
 }
-
+              
 void removeNode(node *&N, int value)
 {
      if (N == NULL)  //nothing to do, return
@@ -116,12 +133,12 @@ void removeNode(node *&N, int value)
      }
 }
 
-void menu (node* root)
+void menu (node*& root)
 {
      int choice, value;
-     cout << "1> Add new element" << endl;
-     cout << "2> Remove an element" << endl;
-     cout << "3> Draw binary search tree" << endl;
+     cout << "1> Add new node" << endl;
+     cout << "2> Remove a node" << endl;
+     cout << "3> Draw whole tree" << endl;
      cout << "4> Show height" << endl;
      cout << "0> Quit" << endl;
      cout << "> ";
@@ -129,19 +146,27 @@ void menu (node* root)
      switch (choice) 
      {
             case 0: // end app
+                 delete root;
                  exit(0);
             break;
             case 1: // add element
                  cout << "Value of node to be added > ";
                  cin >> value;
-                 addElement(root, value);
-                 cout<<"Node has been added successfully!"<<endl;
+                 if (addNode(root, value) == true)
+                     cout<<"Node has been added successfully!"<<endl;
+                 else
+                     cout<<"Such node already exists!"<<endl;
             break;
             case 2: // remove element
                  cout<<"Value of node to be deleted > ";
                  cin>>value;
-                 removeNode(root, value);
-                 cout<<"Node has been deleted successfully!"<<endl;                  
+                 if (isInTree(root, value) == true)
+                 {
+                     removeNode(root, value);
+                     cout<<"Node has been deleted successfully!"<<endl;
+                 }
+                 else
+                     cout<<"Such node doesn't exist!"<<endl;                  
             break;
             case 3: // draw tree
                  drawTree(root);
@@ -152,21 +177,20 @@ void menu (node* root)
                     getHeightOfTree(root, height, 1);
                  cout << "Height: " << height << endl;
             break;
-  }
+     }
 }
 
 int main (int argc, const char **argv) 
 {
     system("COLOR 0A");
     node* root = NULL;
-
-    addElement(root, 15);
-    addElement(root, 20);
-    addElement(root, 18);
-    addElement(root, 22);
-    addElement(root, 6);
-    addElement(root, 5);
-    addElement(root, 8);
+    addNode(root, 15);
+    addNode(root, 20);
+    addNode(root, 18);
+    addNode(root, 22);
+    addNode(root, 6);
+    addNode(root, 5);
+    addNode(root, 8);
     while(true)
     {
        menu(root);
